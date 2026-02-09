@@ -47,7 +47,7 @@ Take points $-0.6 + i * 0.1$, with $i \in [0, 10]$
 
 Multiple points -> use window of size 5
 
-`cargo run --release -- --env mc --depth 2 --num-iters 1000 --predicate-increment 0.1 0.014 --initial-state-values -0.5 0.0 --predicate-reasoning 1`
+`cargo run --release -- --env mc --depth 2 --num-nodes 5 --num-iters 1000 --predicate-increment 0.1 0.014 --initial-state-values -0.5 0.0 --predicate-reasoning 1`
 
 100 starting points, ten times
 
@@ -70,7 +70,7 @@ stops if cart is outside `[-2.4, 2.4]`, or the angle is outside `[-0.2, 0.2]`
 
 Multiple points -> cart position `0.0`, cart velocity `0.05`, pole velocity `0.0`, and the pole angle then takes values $-0.05 + i * 0.01$, $i \in [0, 10]$, then window of size 5
 
-`cargo run --release -- --env cp --depth 2 --num-iters 100000 --predicate-increment 0.1 0.1 0.05 0.1 --initial-state-values -0.05 0.05 0.05 0.05 --predicate-reasoning 1`
+`cargo run --release -- --env cp --depth 2 --num-nodes 5 --num-iters 100000 --predicate-increment 0.1 0.1 0.05 0.1 --initial-state-values -0.05 0.05 0.05 0.05 --predicate-reasoning 1`
 
 ### Pendulum
 
@@ -84,7 +84,7 @@ Takes points: angle velocity is `0.0`, angle is `[1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 
 
 multiple points: sliding window of size 5
 
-`cargo run --release -- --env pen --depth 2 --num-iters 100000 --predicate-increment 0.1 0.1 --initial-state-values 0.5 0.0 --predicate-reasoning 1`
+`cargo run --release -- --env pen --depth 2 --num-nodes 5 --num-iters 100000 --predicate-increment 0.1 0.1 --initial-state-values 0.5 0.0 --predicate-reasoning 1`
 
 
 `State 0: [-0.5, 0.0]
