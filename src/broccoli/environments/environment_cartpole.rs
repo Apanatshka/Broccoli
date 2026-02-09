@@ -135,7 +135,7 @@ mod tests {
     fn test() {
         let mut env = EnvironmentCartPole::new();
 
-        env.reset(&vec![0.0, 0.05, 0.05, 0.05]);
+        env.reset(&[0.0, 0.05, 0.05, 0.05]);
 
         println!("initial state: {:?}", env.observe_state());
         for i in 0..1 {

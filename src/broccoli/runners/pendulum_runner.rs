@@ -78,7 +78,7 @@ fn plot_pendulum(b_output: BroccoliOutput, initial_states: &[Vec<f64>]) {
                     if ob_state[i] != state[i] {
                         println!("{}\n{}\n{}", i, ob_state[i], state[i]);
                     }
-                    assert!(ob_state[i] == state[i]);
+                    assert_eq!(ob_state[i], state[i]);
                 }
 
                 let action = decision_tree_2.get_action(state);

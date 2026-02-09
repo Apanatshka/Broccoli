@@ -42,7 +42,7 @@ impl Broccoli {
         predicate_increments: &[f64],
         use_predicate_reasoning: bool,
     ) -> BroccoliOutput {
-        assert!(evaluator.environment_info().num_features() == predicate_increments.len());
+        assert_eq!(evaluator.environment_info().num_features(), predicate_increments.len());
 
         println!("Starting broccoli...");
 

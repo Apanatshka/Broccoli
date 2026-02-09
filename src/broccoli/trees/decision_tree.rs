@@ -186,7 +186,7 @@ impl DecisionTree {
     }
 
     pub fn merge_threshold_distances(&mut self, source: &DecisionTree) {
-        assert!(self.nodes.len() == source.nodes.len());
+        assert_eq!(self.nodes.len(), source.nodes.len());
         //todo check that it is the same tree
 
         for node_id in 0..self.nodes.len() {
@@ -201,8 +201,8 @@ impl DecisionTree {
     }
 
     pub fn num_predicate_nodes(&self) -> usize {
-        assert!(self.threshold_distance.len() == self.frequencies.len());
-        assert!(self.nodes.len() == self.frequencies.len());
+        assert_eq!(self.threshold_distance.len(), self.frequencies.len());
+        assert_eq!(self.nodes.len(), self.frequencies.len());
         self.nodes.iter().filter(|node| node.is_predicate()).count()
     }
 

@@ -171,6 +171,7 @@ fn get_environment_state_variable_ranges(environment_type: &EnvironmentType) -> 
     }
 }
 
+#[allow(dead_code, reason="Only used to regenerate checked-in scripts")]
 fn neurips_script_experiment1() {
     let mut script: String = String::new();
 
@@ -240,12 +241,13 @@ fn neurips_script_experiment1() {
         script += &format!("./broccoli.exe --env {name} --depth 2 --num-iters 10000 --predicate-increment 0.2 0.2 --NeurIPS {seed} 100 --predicate-reasoning 0 > exp1_multiple_{name}_{seed}_no.txt\n");
     }
 
-    file.write(script.as_bytes())
+    file.write_all(script.as_bytes())
         .expect("Writing as bytes failed?");
 
     panic!();
 }
 
+#[allow(dead_code, reason="Only used to regenerate checked-in scripts")]
 fn neurips_script_experiment_scale_predicates() {
     let mut script: String = String::new();
 
@@ -348,12 +350,13 @@ fn neurips_script_experiment_scale_predicates() {
         }
     }
 
-    file.write(script.as_bytes())
+    file.write_all(script.as_bytes())
         .expect("Writing as bytes failed?");
 
     panic!();
 }
 
+#[allow(dead_code, reason="Only used to regenerate checked-in scripts")]
 fn neurips_script_experiment_num_nodes() {
     let mut script: String = String::new();
 
@@ -400,7 +403,7 @@ fn neurips_script_experiment_num_nodes() {
         }
     }
 
-    file.write(script.as_bytes())
+    file.write_all(script.as_bytes())
         .expect("Writing as bytes failed?");
 
     panic!();
@@ -426,10 +429,7 @@ fn main() {
     let initial_states = if args.neurips_parameters.is_empty() {
         extract_initial_states(&args.initial_states_flattened, num_state_variables)
     } else {
-        assert!(
-            args.neurips_parameters.len() == 2,
-            "Expected two values for the NeurIPS experiments."
-        );
+        assert_eq!(args.neurips_parameters.len(), 2, "Expected two values for the NeurIPS experiments.");
         //depending on the environment, create a vector of state ranges
         //  the initial states will be randomly sampled within these ranges
         let state_variable_ranges =

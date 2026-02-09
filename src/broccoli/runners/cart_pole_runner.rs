@@ -80,7 +80,7 @@ fn plot_cart_pole(
                 if ob_state[i] != state[i] {
                     println!("{}\n{}\n{}", i, ob_state[i], state[i]);
                 }
-                assert!(ob_state[i] == state[i]);
+                assert_eq!(ob_state[i], state[i]);
             }
 
             let action = decision_tree_2.get_action(state);
