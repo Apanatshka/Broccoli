@@ -35,14 +35,17 @@ impl BroccoliOutput {
 //predicate generator
 
 impl Broccoli {
-    pub fn compute_decision_tree(
+    pub fn compute_decision_tree<'a>(
         decision_tree_depth: u32,
         num_predicate_nodes: u32,
-        mut evaluator: Box<dyn Evaluator>,
+        mut evaluator: Box<dyn Evaluator + 'a>,
         predicate_increments: &[f64],
         use_predicate_reasoning: bool,
     ) -> BroccoliOutput {
-        assert_eq!(evaluator.environment_info().num_features(), predicate_increments.len());
+        assert_eq!(
+            evaluator.environment_info().num_features(),
+            predicate_increments.len()
+        );
 
         println!("Starting broccoli...");
 

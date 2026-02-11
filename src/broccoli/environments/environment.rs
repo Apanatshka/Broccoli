@@ -1,30 +1,60 @@
+use crate::broccoli::evaluators::environment_evaluator_maximise_iterations::EnvironmentEvaluatorMaximiseIterations;
+use crate::broccoli::evaluators::environment_evaluator_minimise_iterations::EnvironmentEvaluatorMinimiseIterations;
+use crate::broccoli::evaluators::evaluator::Evaluator;
 use crate::broccoli::trees::decision_tree::DecisionTree;
 
 pub trait Environment {
+    fn minimise(&self) -> bool;
     fn apply_action(&mut self, action: usize);
     fn observe_state(&self) -> Vec<f64>;
     fn is_at_terminal_state(&self) -> bool;
     fn reset(&mut self, initial_state: &[f64]);
-    fn environment_info(&self) -> EnvironmentInfo;
+    fn environment_info(&self) -> &EnvironmentInfo;
+    fn evaluator<'a>(
+        &'a mut self,
+        initial_states: &[Vec<f64>],
+        max_num_states: u32,
+    ) -> Box<dyn Evaluator + 'a> {
+        if self.minimise() {
+            Box::new(EnvironmentEvaluatorMinimiseIterations::new(
+                self,
+                initial_states,
+                max_num_states,
+            ))
+        } else {
+            Box::new(EnvironmentEvaluatorMaximiseIterations::new(
+                self,
+                initial_states,
+                max_num_states,
+            ))
+        }
+    }
 }
 
 #[derive(Clone)]
 pub struct EnvironmentInfo {
-    //for each state variable, max and min value it can take
-    feature_ranges: Vec<Interval>,
-    num_actions: usize,
+    // for each state variable, max and min value it can take
+    pub feature_ranges: Vec<Interval>,
+    // for each state variable, max and min value at the start
+    pub start_ranges: Vec<Interval>,
+    pub num_actions: usize,
 }
 
 impl EnvironmentInfo {
-    pub fn new(ranges: Vec<Interval>, num_actions: usize) -> EnvironmentInfo {
+    pub fn new(
+        feature_ranges: Vec<Interval>,
+        start_ranges: Vec<Interval>,
+        num_actions: usize,
+    ) -> EnvironmentInfo {
         EnvironmentInfo {
-            feature_ranges: ranges,
+            feature_ranges,
+            start_ranges,
             num_actions,
         }
     }
 
-    pub fn feature_name(&self, feature_index: usize) -> String {
-        self.feature_ranges[feature_index].name.clone()
+    pub fn feature_name(&self, feature_index: usize) -> &str {
+        &self.feature_ranges[feature_index].name
     }
 
     pub fn num_actions(&self) -> usize {
@@ -42,6 +72,7 @@ impl EnvironmentInfo {
 
 #[derive(Clone)]
 pub struct Interval {
+    /// Name of the feature. Only used in plotting
     pub name: String,
     pub min: f64,
     pub max: f64,
@@ -53,7 +84,7 @@ impl Interval {
     }
 }
 
-pub fn run_simulation_until_terminate_state<E: Environment>(
+pub fn run_simulation_until_terminate_state<E: Environment + ?Sized>(
     environment: &mut E,
     initial_state: &[f64],
     controller: &mut DecisionTree,
@@ -79,7 +110,7 @@ pub fn run_simulation_until_terminate_state<E: Environment>(
     Err(())
 }
 
-pub fn run_simulation<E: Environment>(
+pub fn run_simulation<E: Environment + ?Sized>(
     environment: &mut E,
     initial_state: &[f64],
     controller: &mut DecisionTree,

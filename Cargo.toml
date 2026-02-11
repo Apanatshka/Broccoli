@@ -9,3 +9,11 @@ edition = "2021"
 plotlib = "0.5.1"
 clap = { version = "4.4.8", features = ["derive"] }
 rand = { version = "0.8.5", features = [ "small_rng" ] }
+pyo3 = "0.28.0"
+
+[lib]
+name = "broccoli_python"
+crate-type = ["cdylib"]
+
+[[bin]]
+name = "broccoli"
