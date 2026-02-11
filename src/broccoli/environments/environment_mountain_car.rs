@@ -1,5 +1,4 @@
 use super::environment::{Environment, EnvironmentInfo, Interval};
-use crate::broccoli::evaluators::evaluator::Evaluator;
 
 pub struct EnvironmentMountainCar {
     state: Vec<f64>, //[0] is the position, [1] is the velocity
@@ -58,6 +57,10 @@ impl EnvironmentMountainCar {
 }
 
 impl Environment for EnvironmentMountainCar {
+    fn name(&self) -> &str {
+        "MountainCar"
+    }
+
     fn minimise(&self) -> bool {
         true
     }

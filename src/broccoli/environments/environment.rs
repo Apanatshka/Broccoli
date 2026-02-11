@@ -2,8 +2,10 @@ use crate::broccoli::evaluators::environment_evaluator_maximise_iterations::Envi
 use crate::broccoli::evaluators::environment_evaluator_minimise_iterations::EnvironmentEvaluatorMinimiseIterations;
 use crate::broccoli::evaluators::evaluator::Evaluator;
 use crate::broccoli::trees::decision_tree::DecisionTree;
+use pyo3::FromPyObject;
 
 pub trait Environment {
+    fn name(&self) -> &str;
     fn minimise(&self) -> bool;
     fn apply_action(&mut self, action: usize);
     fn observe_state(&self) -> Vec<f64>;
@@ -31,7 +33,7 @@ pub trait Environment {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, FromPyObject)]
 pub struct EnvironmentInfo {
     // for each state variable, max and min value it can take
     pub feature_ranges: Vec<Interval>,
@@ -70,7 +72,7 @@ impl EnvironmentInfo {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, FromPyObject)]
 pub struct Interval {
     /// Name of the feature. Only used in plotting
     pub name: String,

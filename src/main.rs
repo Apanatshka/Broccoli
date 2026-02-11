@@ -2,10 +2,6 @@ use std::{fs::File, io::Write};
 
 use clap::Parser;
 
-use crate::broccoli::broccoli_helper_functions::extract_initial_states;
-
-use crate::broccoli::broccoli::Broccoli;
-use crate::broccoli::broccoli_helper_functions::check_predicate_increments;
 use crate::broccoli::environments::environment::Environment;
 use crate::broccoli::environments::environment_cartpole::EnvironmentCartPole;
 use crate::broccoli::environments::environment_mountain_car::EnvironmentMountainCar;
@@ -13,7 +9,6 @@ use crate::broccoli::environments::environment_pendulum::EnvironmentPendulum;
 use crate::broccoli::runners::cart_pole_runner::plot_cart_pole;
 use crate::broccoli::runners::mountain_car_runner::plot_mountain_car;
 use crate::broccoli::runners::pendulum_runner::plot_pendulum;
-use rand::{rngs::SmallRng, Rng, SeedableRng};
 
 mod broccoli;
 
@@ -363,6 +358,14 @@ fn main() {
 
     let args = Args::parse();
 
+    let depth = args.depth;
+    let num_nodes = args.num_nodes;
+    let num_simulation_iterations = args.num_simulation_iterations;
+    let predicate_increments = args.predicate_increments;
+    let use_predicate_reasoning = args.use_predicate_reasoning.inner;
+    let neurips_parameters = args.neurips_parameters;
+    let initial_states_flattened = args.initial_states_flattened;
+
     println!("Depth: {}", args.depth);
 
     let environment: &mut dyn Environment = match args.environment_type.inner {
@@ -370,74 +373,17 @@ fn main() {
         EnvironmentType::CartPole => &mut EnvironmentCartPole::new(),
         EnvironmentType::Pendulum => &mut EnvironmentPendulum::new(),
     };
-    let num_state_variables = environment.environment_info().feature_ranges.len();
 
-    let initial_states = if args.neurips_parameters.is_empty() {
-        extract_initial_states(&args.initial_states_flattened, num_state_variables)
-    } else {
-        assert_eq!(
-            args.neurips_parameters.len(),
-            2,
-            "Expected two values for the NeurIPS experiments."
-        );
-        //depending on the environment, create a vector of state ranges
-        //  the initial states will be randomly sampled within these ranges
-        let state_variable_ranges = &environment.environment_info().start_ranges;
-        let seed = args.neurips_parameters[0];
-        println!("Seed: {seed}");
-
-        let num_initial_states = args.neurips_parameters[1];
-        println!("Num initial states: {num_initial_states}");
-
-        let mut random_generator = SmallRng::seed_from_u64(seed);
-
-        let mut initial_states: Vec<Vec<f64>> = vec![];
-        for _i in 0..num_initial_states {
-            let mut state: Vec<f64> = vec![];
-            for variable_range in state_variable_ranges {
-                let mut val = random_generator.gen_range(variable_range.min..=variable_range.max);
-
-                //rounding to two decimal places for simplicity
-                val *= 1000.0;
-                val = ((val as i64) as f64) / 1000.0;
-
-                state.push(val);
-            }
-            initial_states.push(state);
-        }
-        initial_states
-    };
-
-    if initial_states.len() <= 100 {
-        for state in initial_states.iter().enumerate() {
-            println!("State {}: {:?}", state.0, state.1);
-        }
-    }
-
-    println!("Starting: {:?}", args.environment_type.inner);
-    let depth = args.depth;
-    let num_nodes = args.num_nodes;
-    let num_simulation_iterations = args.num_simulation_iterations;
-    let predicate_increments = &args.predicate_increments;
-    let use_predicate_reasoning = args.use_predicate_reasoning.inner;
-
-    //let initial_states: Vec<Vec<f64>> = extract_initial_states(initial_states_flattened, num_state_variables);
-    check_predicate_increments(predicate_increments, num_state_variables);
-
-    //construct supporting structs
-    let evaluator = environment.evaluator(&initial_states, num_simulation_iterations);
-
-    //run the main tree algorithm
-    let b_output = Broccoli::compute_decision_tree(
+    let (initial_states, b_output) = broccoli::broccoli::run_solver(
         depth,
         num_nodes,
-        evaluator,
-        predicate_increments,
+        num_simulation_iterations,
+        &predicate_increments,
         use_predicate_reasoning,
+        neurips_parameters,
+        &initial_states_flattened,
+        environment,
     );
-
-    //process output
-    b_output.print_basic_stats();
 
     match args.environment_type.inner {
         EnvironmentType::MountainCar => {

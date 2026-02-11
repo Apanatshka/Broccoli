@@ -2,7 +2,6 @@ use std::f64::consts::PI;
 
 use super::environment::{Environment, EnvironmentInfo, Interval};
 use crate::broccoli::broccoli_helper_functions::brocolli_within_range;
-use crate::broccoli::evaluators::evaluator::Evaluator;
 
 pub struct EnvironmentCartPole {
     //state
@@ -100,6 +99,10 @@ impl EnvironmentCartPole {
 }
 
 impl Environment for EnvironmentCartPole {
+    fn name(&self) -> &str {
+        "Cartpole"
+    }
+
     fn minimise(&self) -> bool {
         false
     }

@@ -1,6 +1,5 @@
 use super::environment::{Environment, EnvironmentInfo, Interval};
 use crate::broccoli::broccoli_helper_functions::brocolli_within_range;
-use crate::broccoli::evaluators::evaluator::Evaluator;
 
 //taken from https://github.com/openai/gym/blob/master/gym/envs/classic_control/pendulum.py
 
@@ -64,6 +63,9 @@ impl EnvironmentPendulum {
 }
 
 impl Environment for EnvironmentPendulum {
+    fn name(&self) -> &str {
+        "Pendulum"
+    }
     fn minimise(&self) -> bool {
         true
     }

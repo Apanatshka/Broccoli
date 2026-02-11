@@ -1,6 +1,11 @@
-use std::time::Duration;
-
+use crate::broccoli::broccoli_helper_functions::{
+    check_predicate_increments, extract_initial_states,
+};
+use crate::broccoli::environments::environment::Environment;
 use crate::broccoli::trees::decision_tree_enumerator::DecisionTreeEnumerator;
+use rand::prelude::SmallRng;
+use rand::{Rng, SeedableRng};
+use std::time::Duration;
 
 use super::{evaluators::evaluator::Evaluator, trees::decision_tree::DecisionTree};
 
@@ -109,4 +114,79 @@ impl Broccoli {
             num_environment_calls: evaluator.num_environment_calls(),
         }
     }
+}
+
+pub fn run_solver(
+    depth: u32,
+    num_nodes: u32,
+    num_simulation_iterations: u32,
+    predicate_increments: &Vec<f64>,
+    use_predicate_reasoning: bool,
+    neurips_parameters: Vec<u64>,
+    initial_states_flattened: &Vec<f64>,
+    environment: &mut dyn Environment,
+) -> (Vec<Vec<f64>>, BroccoliOutput) {
+    let num_state_variables = environment.environment_info().feature_ranges.len();
+
+    let initial_states = if neurips_parameters.is_empty() {
+        extract_initial_states(initial_states_flattened, num_state_variables)
+    } else {
+        assert_eq!(
+            neurips_parameters.len(),
+            2,
+            "Expected two values for the NeurIPS experiments."
+        );
+        //depending on the environment, create a vector of state ranges
+        //  the initial states will be randomly sampled within these ranges
+        let state_variable_ranges = &environment.environment_info().start_ranges;
+        let seed = neurips_parameters[0];
+        println!("Seed: {seed}");
+
+        let num_initial_states = neurips_parameters[1];
+        println!("Num initial states: {num_initial_states}");
+
+        let mut random_generator = SmallRng::seed_from_u64(seed);
+
+        let mut initial_states: Vec<Vec<f64>> = vec![];
+        for _i in 0..num_initial_states {
+            let mut state: Vec<f64> = vec![];
+            for variable_range in state_variable_ranges {
+                let mut val = random_generator.gen_range(variable_range.min..=variable_range.max);
+
+                //rounding to two decimal places for simplicity
+                val *= 1000.0;
+                val = ((val as i64) as f64) / 1000.0;
+
+                state.push(val);
+            }
+            initial_states.push(state);
+        }
+        initial_states
+    };
+
+    if initial_states.len() <= 100 {
+        for state in initial_states.iter().enumerate() {
+            println!("State {}: {:?}", state.0, state.1);
+        }
+    }
+
+    println!("Starting: {}", environment.name());
+
+    check_predicate_increments(predicate_increments, num_state_variables);
+
+    //construct supporting structs
+    let evaluator = environment.evaluator(&initial_states, num_simulation_iterations);
+
+    //run the main tree algorithm
+    let b_output = Broccoli::compute_decision_tree(
+        depth,
+        num_nodes,
+        evaluator,
+        predicate_increments,
+        use_predicate_reasoning,
+    );
+
+    //process output
+    b_output.print_basic_stats();
+    (initial_states, b_output)
 }
