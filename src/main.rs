@@ -1,7 +1,3 @@
-use std::{fs::File, io::Write};
-
-use clap::Parser;
-
 use crate::broccoli::environments::environment::Environment;
 use crate::broccoli::environments::environment_cartpole::EnvironmentCartPole;
 use crate::broccoli::environments::environment_mountain_car::EnvironmentMountainCar;
@@ -9,6 +5,9 @@ use crate::broccoli::environments::environment_pendulum::EnvironmentPendulum;
 use crate::broccoli::runners::cart_pole_runner::plot_cart_pole;
 use crate::broccoli::runners::mountain_car_runner::plot_mountain_car;
 use crate::broccoli::runners::pendulum_runner::plot_pendulum;
+use clap::Parser;
+use pyo3::prelude::PyAnyMethods;
+use std::{fs::File, io::Write};
 
 mod broccoli;
 

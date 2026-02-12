@@ -41,7 +41,7 @@ struct PythonBasedEnvironment<'py> {
     apply_action: Bound<'py, PyAny>,
     observe_state: Bound<'py, PyAny>,
     is_at_terminal_state: Bound<'py, PyAny>,
-    reset: Bound<'py, PyAny>,
+    rust_reset: Bound<'py, PyAny>,
     environment_info: EnvironmentInfo,
     minimise: bool,
     name: String,
@@ -77,7 +77,7 @@ impl Environment for PythonBasedEnvironment<'_> {
     }
 
     fn reset(&mut self, initial_state: &[f64]) {
-        self.reset
+        self.rust_reset
             .call1((initial_state,))
             .expect("observe_state should succeed");
     }
