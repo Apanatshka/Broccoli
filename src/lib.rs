@@ -1,4 +1,5 @@
 use crate::broccoli::environments::environment::{Environment, EnvironmentInfo};
+use numpy::PyArray1;
 use pyo3::prelude::*;
 
 mod broccoli;
@@ -77,6 +78,7 @@ impl Environment for PythonBasedEnvironment<'_> {
     }
 
     fn reset(&mut self, initial_state: &[f64]) {
+        let initial_state = PyArray1::from_slice(self.rust_reset.py(), initial_state);
         self.rust_reset
             .call1((initial_state,))
             .expect("observe_state should succeed");
