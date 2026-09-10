@@ -46,6 +46,7 @@ impl Broccoli {
         mut evaluator: Box<dyn Evaluator + 'a>,
         predicate_increments: &[f64],
         use_predicate_reasoning: bool,
+        time_limit: Duration,
     ) -> BroccoliOutput {
         assert_eq!(
             evaluator.environment_info().num_features(),
@@ -102,6 +103,11 @@ impl Broccoli {
             if use_predicate_reasoning {
                 enumerator.apply_threshold_reasoning(&decision_tree_with_info);
             }
+
+            if time_tracker.elapsed() > time_limit {
+                println!("Time limit reached!");
+                break
+            }
         }
 
         println!("Trees with unused nodes: {}", trees_with_unused_nodes);
@@ -125,6 +131,7 @@ pub fn run_solver(
     neurips_parameters: Vec<u64>,
     initial_states_flattened: &Vec<f64>,
     environment: &mut dyn Environment,
+    time_limit: Duration,
 ) -> (Vec<Vec<f64>>, BroccoliOutput) {
     let num_state_variables = environment.environment_info().feature_ranges.len();
 
@@ -184,6 +191,7 @@ pub fn run_solver(
         evaluator,
         predicate_increments,
         use_predicate_reasoning,
+        time_limit,
     );
 
     //process output

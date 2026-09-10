@@ -7,7 +7,7 @@ use crate::broccoli::runners::mountain_car_runner::plot_mountain_car;
 use crate::broccoli::runners::pendulum_runner::plot_pendulum;
 use clap::Parser;
 use pyo3::prelude::PyAnyMethods;
-use std::{fs::File, io::Write};
+use std::{fs::File, io::Write, time::Duration};
 
 mod broccoli;
 
@@ -373,6 +373,7 @@ fn main() {
         EnvironmentType::Pendulum => &mut EnvironmentPendulum::new(),
     };
 
+    let time_limit = Duration::MAX;
     let (initial_states, b_output) = broccoli::broccoli::run_solver(
         depth,
         num_nodes,
@@ -382,6 +383,7 @@ fn main() {
         neurips_parameters,
         &initial_states_flattened,
         environment,
+        time_limit,
     );
 
     match args.environment_type.inner {

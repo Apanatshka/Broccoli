@@ -6,7 +6,9 @@ mod broccoli;
 
 #[pymodule]
 mod broccoli_python {
-    use crate::broccoli::broccoli;
+    use std::time::Duration;
+
+use crate::broccoli::broccoli;
     use crate::broccoli::trees::decision_tree::Node;
     use crate::PythonBasedEnvironment;
     use pyo3::prelude::*;
@@ -20,6 +22,7 @@ mod broccoli_python {
         predicate_increments: Vec<f64>,
         use_predicate_reasoning: bool,
         initial_states_flattened: Vec<f64>,
+        time_limit: u64,
     ) -> PyResult<Vec<Node>> {
         let (_, result) = broccoli::run_solver(
             depth,
@@ -30,6 +33,7 @@ mod broccoli_python {
             Vec::new(),
             &initial_states_flattened,
             &mut env,
+            Duration::new(time_limit, 0),
         );
         result.decision_tree.map(|dt| dt.get_nodes().clone()).ok_or(
             pyo3::exceptions::PyRuntimeError::new_err("Solver did not find a decision tree"),
@@ -94,7 +98,7 @@ impl Environment for PythonBasedEnvironment<'_> {
         let initial_state = PyArray1::from_slice(self.rust_reset.py(), initial_state);
         self.rust_reset
             .call1((initial_state,))
-            .expect("observe_state should succeed");
+            .expect("rust_reset should succeed");
     }
 
     fn environment_info(&self) -> &EnvironmentInfo {

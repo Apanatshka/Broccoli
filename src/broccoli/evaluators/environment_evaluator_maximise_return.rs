@@ -44,7 +44,7 @@ impl<'a, E: Environment + ?Sized> Evaluator for EnvironmentEvaluatorMaximiseRetu
             );
             self.num_environment_calls += 1;
 
-            if total_return <= self.best_score.unwrap_or(0.0) {
+            if total_return <= self.best_score.unwrap_or(-1e10) {
                 return (controller, Err(()));
             } else {
                 match new_global_score {
@@ -66,6 +66,7 @@ impl<'a, E: Environment + ?Sized> Evaluator for EnvironmentEvaluatorMaximiseRetu
                     None => controller_global = Some(controller),
                 }
             }
+
         }
         (
             controller_global.unwrap(),
@@ -74,8 +75,6 @@ impl<'a, E: Environment + ?Sized> Evaluator for EnvironmentEvaluatorMaximiseRetu
     }
 
     fn register_new_best_score(&mut self, new_best_score: f64) {
-        assert!(broccoli_greater_or_equal(new_best_score, 0.0));
-
         assert!(self.best_score.is_none() || new_best_score > self.best_score.unwrap());
         self.best_score = Some(new_best_score);
     }
