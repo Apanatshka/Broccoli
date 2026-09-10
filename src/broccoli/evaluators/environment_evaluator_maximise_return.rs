@@ -10,7 +10,7 @@ pub struct EnvironmentEvaluatorMaximiseReturn<'a, E: Environment + ?Sized> {
     environment: &'a mut E,
     initial_states: Vec<Vec<f64>>,
     max_num_states: u32,
-    best_score: Option<u32>,
+    best_score: Option<f64>,
     num_environment_calls: usize,
 }
 
@@ -32,14 +32,8 @@ impl<'a, E: Environment + ?Sized> Evaluator for EnvironmentEvaluatorMaximiseRetu
     }
 
     fn evaluate(&mut self, decision_tree: DecisionTree) -> (DecisionTree, Result<f64, ()>) {
-        if let Some(optimal_value) = self.best_score {
-            if optimal_value == self.max_num_states {
-                return (decision_tree, Err(()));
-            }
-        }
-
         let mut controller_global: Option<DecisionTree> = None;
-        let mut new_global_score: Option<u32> = None;
+        let mut new_global_score: Option<f64> = None;
         for initial_state in &self.initial_states {
             let mut controller = decision_tree.clone();
             let total_return = run_simulation_with_rewards(
@@ -50,7 +44,7 @@ impl<'a, E: Environment + ?Sized> Evaluator for EnvironmentEvaluatorMaximiseRetu
             );
             self.num_environment_calls += 1;
 
-            if total_return <= self.best_score.unwrap_or(0) {
+            if total_return <= self.best_score.unwrap_or(0.0) {
                 return (controller, Err(()));
             } else {
                 match new_global_score {
@@ -75,7 +69,7 @@ impl<'a, E: Environment + ?Sized> Evaluator for EnvironmentEvaluatorMaximiseRetu
         }
         (
             controller_global.unwrap(),
-            Ok(new_global_score.unwrap() as f64),
+            Ok(new_global_score.unwrap()),
         )
     }
 
@@ -83,8 +77,8 @@ impl<'a, E: Environment + ?Sized> Evaluator for EnvironmentEvaluatorMaximiseRetu
         assert!(broccoli_is_integer(new_best_score));
         assert!(broccoli_greater_or_equal(new_best_score, 0.0));
 
-        assert!(self.best_score.is_none() || (new_best_score as u32) > self.best_score.unwrap());
-        self.best_score = Some(new_best_score as u32);
+        assert!(self.best_score.is_none() || new_best_score > self.best_score.unwrap());
+        self.best_score = Some(new_best_score);
     }
 
     fn num_environment_calls(&self) -> usize {

@@ -154,13 +154,13 @@ pub fn run_simulation_with_rewards<E: Environment + ?Sized>(
     initial_state: &[f64],
     controller: &mut DecisionTree,
     max_num_states: u32,
-) -> u32 {
+) -> f64 {
     assert!(max_num_states >= 1);
 
     environment.reset(initial_state);
 
     if environment.is_at_terminal_state() {
-        return 0;
+        return 0.0;
     }
 
     let mut total_return = 0.0;
@@ -175,7 +175,7 @@ pub fn run_simulation_with_rewards<E: Environment + ?Sized>(
             break;
         }
     }
-    return total_return as u32
+    return total_return
 }
 
 pub fn run_successful_simulation_with_trace<E: Environment>(
