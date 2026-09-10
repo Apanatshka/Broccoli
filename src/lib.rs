@@ -41,10 +41,12 @@ mod broccoli_python {
 struct PythonBasedEnvironment<'py> {
     apply_action: Bound<'py, PyAny>,
     observe_state: Bound<'py, PyAny>,
+    get_reward: Bound<'py, PyAny>,
     is_at_terminal_state: Bound<'py, PyAny>,
     rust_reset: Bound<'py, PyAny>,
     environment_info: EnvironmentInfo,
     minimise: bool,
+    rewards: bool,
     name: String,
 }
 
@@ -54,6 +56,9 @@ impl Environment for PythonBasedEnvironment<'_> {
     }
     fn minimise(&self) -> bool {
         self.minimise
+    }
+    fn rewards(&self) -> bool {
+        self.rewards
     }
     fn apply_action(&mut self, action: usize) {
         self.apply_action
@@ -67,6 +72,14 @@ impl Environment for PythonBasedEnvironment<'_> {
             .expect("observe_state should succeed")
             .extract()
             .expect("observe_state should return a list of floats")
+    }
+
+    fn get_reward(&self) -> f64 {
+        self.get_reward
+            .call0()
+            .expect("get_reward should succeed")
+            .extract()
+            .expect("get_reward should return a float")
     }
 
     fn is_at_terminal_state(&self) -> bool {

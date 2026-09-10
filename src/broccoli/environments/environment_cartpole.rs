@@ -106,6 +106,9 @@ impl Environment for EnvironmentCartPole {
     fn minimise(&self) -> bool {
         false
     }
+    fn rewards(&self) -> bool {
+        false
+    }
 
     //taken from https://github.com/openai/gym/blob/master/gym/envs/classic_control/cartpole.py
     fn apply_action(&mut self, action: usize) {
@@ -140,6 +143,10 @@ impl Environment for EnvironmentCartPole {
             self.pole_angle,
             self.pole_velocity,
         ]
+    }
+
+    fn get_reward(&self) -> f64 {
+        0.0
     }
 
     fn is_at_terminal_state(&self) -> bool {

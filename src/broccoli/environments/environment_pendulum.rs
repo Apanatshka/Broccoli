@@ -69,6 +69,9 @@ impl Environment for EnvironmentPendulum {
     fn minimise(&self) -> bool {
         true
     }
+    fn rewards(&self) -> bool {
+        false
+    }
 
     fn apply_action(&mut self, action: usize) {
         let u: f64 = if action == 0 {
@@ -114,6 +117,10 @@ impl Environment for EnvironmentPendulum {
     //possible issue: openAI gym uses f32, and not f64, so there may be a discrepancy
     fn observe_state(&self) -> Vec<f64> {
         vec![self.angle, self.angular_velocity]
+    }
+
+    fn get_reward(&self) -> f64 {
+        0.0
     }
 
     fn is_at_terminal_state(&self) -> bool {

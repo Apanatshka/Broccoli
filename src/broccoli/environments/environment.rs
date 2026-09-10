@@ -1,5 +1,6 @@
 use crate::broccoli::evaluators::environment_evaluator_maximise_iterations::EnvironmentEvaluatorMaximiseIterations;
 use crate::broccoli::evaluators::environment_evaluator_minimise_iterations::EnvironmentEvaluatorMinimiseIterations;
+use crate::broccoli::evaluators::environment_evaluator_maximise_return::EnvironmentEvaluatorMaximiseReturn;
 use crate::broccoli::evaluators::evaluator::Evaluator;
 use crate::broccoli::trees::decision_tree::DecisionTree;
 use pyo3::FromPyObject;
@@ -7,8 +8,10 @@ use pyo3::FromPyObject;
 pub trait Environment {
     fn name(&self) -> &str;
     fn minimise(&self) -> bool;
+    fn rewards(&self) -> bool;
     fn apply_action(&mut self, action: usize);
     fn observe_state(&self) -> Vec<f64>;
+    fn get_reward(&self) -> f64;
     fn is_at_terminal_state(&self) -> bool;
     fn reset(&mut self, initial_state: &[f64]);
     fn environment_info(&self) -> &EnvironmentInfo;
@@ -24,11 +27,19 @@ pub trait Environment {
                 max_num_states,
             ))
         } else {
-            Box::new(EnvironmentEvaluatorMaximiseIterations::new(
-                self,
-                initial_states,
-                max_num_states,
-            ))
+            if self.rewards() {
+                Box::new(EnvironmentEvaluatorMaximiseReturn::new(
+                    self,
+                    initial_states,
+                    max_num_states,
+                ))
+            } else {
+                Box::new(EnvironmentEvaluatorMaximiseIterations::new(
+                    self,
+                    initial_states,
+                    max_num_states,
+                ))
+            }
         }
     }
 }
@@ -136,6 +147,35 @@ pub fn run_simulation<E: Environment + ?Sized>(
         }
     }
     max_num_states
+}
+
+pub fn run_simulation_with_rewards<E: Environment + ?Sized>(
+    environment: &mut E,
+    initial_state: &[f64],
+    controller: &mut DecisionTree,
+    max_num_states: u32,
+) -> u32 {
+    assert!(max_num_states >= 1);
+
+    environment.reset(initial_state);
+
+    if environment.is_at_terminal_state() {
+        return 0;
+    }
+
+    let mut total_return = 0.0;
+    for i in 0..(max_num_states - 1) {
+        let state = environment.observe_state();
+        let action = controller.get_action(&state);
+        environment.apply_action(action);
+
+        total_return += environment.get_reward();
+
+        if environment.is_at_terminal_state() {
+            break;
+        }
+    }
+    return total_return as u32
 }
 
 pub fn run_successful_simulation_with_trace<E: Environment>(

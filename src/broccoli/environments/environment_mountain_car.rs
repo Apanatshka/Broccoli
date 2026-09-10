@@ -64,6 +64,9 @@ impl Environment for EnvironmentMountainCar {
     fn minimise(&self) -> bool {
         true
     }
+    fn rewards(&self) -> bool {
+        false
+    }
 
     fn apply_action(&mut self, action: usize) {
         let velocity_change: f64 = self.compute_velocity_change(action);
@@ -85,6 +88,10 @@ impl Environment for EnvironmentMountainCar {
 
     fn observe_state(&self) -> Vec<f64> {
         self.state.clone()
+    }
+
+    fn get_reward(&self) -> f64 {
+        0.0
     }
 
     fn is_at_terminal_state(&self) -> bool {
