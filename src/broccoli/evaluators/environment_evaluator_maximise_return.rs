@@ -74,7 +74,6 @@ impl<'a, E: Environment + ?Sized> Evaluator for EnvironmentEvaluatorMaximiseRetu
     }
 
     fn register_new_best_score(&mut self, new_best_score: f64) {
-        assert!(broccoli_is_integer(new_best_score));
         assert!(broccoli_greater_or_equal(new_best_score, 0.0));
 
         assert!(self.best_score.is_none() || new_best_score > self.best_score.unwrap());
